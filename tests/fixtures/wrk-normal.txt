@@ -1,0 +1,39 @@
+AFFINITY 5
+PHASE primer 8 8
+cpu4 1000 0 0 1000 0 0 0 0 0 0
+cpu5 1000 0 0 1000 0 0 0 0 0 0
+Running 5s test @ http://127.0.0.1:8080/json
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   210.00us   50.00us   2.00ms   90.00%
+    Req/Sec     4.00k   200.00     4.50k    70.00%
+  Latency Distribution
+     50%  200.00us
+     75%  230.00us
+     90%  260.00us
+     99%  400.00us
+  160000 requests in 5.00s, 25.00MB read
+Requests/sec:  32000.00
+Transfer/sec:      5.00MB
+cpu4 1500 0 0 1500 0 0 0 0 0 0
+cpu5 1500 0 0 1500 0 0 0 0 0 0
+END
+PHASE level 16 1
+cpu4 1000 0 0 1000 0 0 0 0 0 0
+cpu5 1000 0 0 1000 0 0 0 0 0 0
+Running 15s test @ http://127.0.0.1:8080/json
+  1 threads and 16 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   500.00us  100.00us   5.00ms   80.00%
+    Req/Sec    32.00k     1.00k   34.00k    75.00%
+  Latency Distribution
+     50%  480.00us
+     75%  550.00us
+     90%    0.65ms
+     99%    1.20ms
+  480000 requests in 15.00s, 75.00MB read
+Requests/sec:  32000.50
+Transfer/sec:      5.00MB
+cpu4 1750 0 0 1250 0 0 0 0 0 0
+cpu5 1250 0 250 1500 0 0 0 0 0 0
+END
