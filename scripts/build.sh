@@ -18,6 +18,15 @@ build_tools() {
         .
 }
 
+build_wrk() {
+    docker build \
+        --file common/wrk/Dockerfile \
+        --build-arg UBUNTU_IMAGE \
+        --build-arg WRK_PACKAGE \
+        --tag bench/wrk \
+        .
+}
+
 # Builds the image of a variant. When the variant has a PHALCON_COMMIT, the
 # Phalcon tag must point to that commit (D3).
 build_variant() {
@@ -54,6 +63,7 @@ build_target() {
     case "${1:-}" in
         base) build_base ;;
         tools) build_tools ;;
+        wrk) build_wrk ;;
         "") bench_die "missing build target" ;;
         *) build_variant "$1" ;;
     esac
