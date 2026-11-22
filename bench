@@ -8,6 +8,8 @@ cd "$(dirname "$(readlink -f "$0")")"
 . scripts/lib.sh
 # shellcheck source=scripts/build.sh
 . scripts/build.sh
+# shellcheck source=scripts/run.sh
+. scripts/run.sh
 
 bench_load_env
 
@@ -19,6 +21,10 @@ Commands:
   build <target>     Build an image. Targets: base, tools, wrk, <variant>
   lint               Run PHP_CodeSniffer and PHPStan
   report <folder>    Make results.json and report.txt of a run folder
+  run [options]      Run the benchmarks and the report. Options:
+                     --variants "<names>", --repetitions <n>, --duration <s>,
+                     --levels-json "<list>", --levels-plaintext "<list>",
+                     --env NAME=VALUE (server), --allow-noise, --dom0-confirmed
   stop               Remove the benchmark containers
   test [arguments]   Run PHPUnit
   tools <command>    Run a command in the tools image
@@ -122,6 +128,9 @@ case "$command" in
     report)
         [ -n "${1:-}" ] || bench_die "usage: ./bench report <folder>"
         bench_tools php scripts/report.php "$1"
+        ;;
+    run)
+        cmd_run "$@"
         ;;
     stop)
         bench_cleanup
