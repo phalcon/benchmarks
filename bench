@@ -18,6 +18,7 @@ Usage: ./bench <command> [arguments]
 Commands:
   build <target>     Build an image. Targets: base, tools, wrk, <variant>
   lint               Run PHP_CodeSniffer and PHPStan
+  report <folder>    Make results.json and report.txt of a run folder
   stop               Remove the benchmark containers
   test [arguments]   Run PHPUnit
   tools <command>    Run a command in the tools image
@@ -117,6 +118,10 @@ case "$command" in
     lint)
         bench_tools vendor/bin/phpcs
         bench_tools vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+        ;;
+    report)
+        [ -n "${1:-}" ] || bench_die "usage: ./bench report <folder>"
+        bench_tools php scripts/report.php "$1"
         ;;
     stop)
         bench_cleanup
