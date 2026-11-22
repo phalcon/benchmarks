@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="benchmarks">
+    <description>Coding standard of the benchmarks suite.</description>
+
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="p"/>
+
+    <rule ref="PSR12"/>
+
+    <file>scripts</file>
+    <file>src</file>
+    <file>tests</file>
+
+    <exclude-pattern>tests/fixtures/*</exclude-pattern>
+</ruleset>

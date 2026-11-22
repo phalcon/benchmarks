@@ -1,0 +1,27 @@
+{
+    "name": "phalcon/benchmarks",
+    "description": "HTTP benchmarks for cphalcon and phalcon",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": "^8.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Benchmarks\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Benchmarks\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.3",
+        "phpunit/phpunit": "^13.4",
+        "squizlabs/php_codesniffer": "^4.0"
+    }
+}
