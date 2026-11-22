@@ -16,11 +16,58 @@ usage() {
 Usage: ./bench <command> [arguments]
 
 Commands:
-  build <target>     Build an image. Targets: tools
+  build <target>     Build an image. Targets: base, tools, <variant>
   lint               Run PHP_CodeSniffer and PHPStan
+  stop               Remove the benchmark containers
   test [arguments]   Run PHPUnit
   tools <command>    Run a command in the tools image
+  verify <variant> [--keep] [--env NAME=VALUE]...
+                     Start the server of a variant and check it
 EOF
+}
+
+# Starts the server of a variant, checks the CPU affinity, the variant and
+# the responses. With --keep, the server stays up after a pass.
+cmd_verify() {
+    local variant="" keep=0 status=0 file
+    local env_args=()
+    local out=.local/verify
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --keep) keep=1 ;;
+            --env) env_args+=(--env "$2"); shift ;;
+            -*) bench_die "unknown option: $1" ;;
+            *) variant=$1 ;;
+        esac
+        shift
+    done
+    [ -n "$variant" ] || bench_die "missing variant"
+    [ -f "variants/${variant}/variant.env" ] || bench_die "unknown variant: ${variant}"
+
+    bench_trap_cleanup
+    bench_port_free
+    rm -rf "$out"
+    mkdir -p "$out"
+
+    bench_server_start "$variant" "${env_args[@]}"
+    bench_server_wait
+    bench_server_affinity "${out}/server-affinity.txt" || status=1
+    if [ "$status" -eq 0 ]; then
+        bench_verify_variant "$out" || status=1
+    fi
+
+    for file in server-affinity check verify-json verify-plaintext; do
+        if [ -f "${out}/${file}.txt" ]; then
+            echo "== ${file}"
+            cat "${out}/${file}.txt"
+        fi
+    done
+
+    [ "$status" -eq 0 ] || bench_die "verify failed"
+    if [ "$keep" -eq 1 ]; then
+        trap - EXIT
+    fi
 }
 
 command=${1:-}
@@ -36,11 +83,17 @@ case "$command" in
         bench_tools vendor/bin/phpcs
         bench_tools vendor/bin/phpstan analyse --no-progress --memory-limit=1G
         ;;
+    stop)
+        bench_cleanup
+        ;;
     test)
         bench_tools vendor/bin/phpunit "$@"
         ;;
     tools)
         bench_tools "$@"
+        ;;
+    verify)
+        cmd_verify "$@"
         ;;
     *)
         usage >&2

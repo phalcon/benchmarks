@@ -8,6 +8,7 @@
 
     <rule ref="PSR12"/>
 
+    <file>apps</file>
     <file>scripts</file>
     <file>src</file>
     <file>tests</file>

@@ -1,0 +1,9 @@
+{
+    "name": "phalcon/benchmarks-cphalcon",
+    "description": "cphalcon variant: Phalcon comes from the extension",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": "^8.4"
+    }
+}
