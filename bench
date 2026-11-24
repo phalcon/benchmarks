@@ -20,7 +20,8 @@ usage() {
 Usage: ./bench <command> [arguments]
 
 Commands:
-  build <target>     Build an image. Targets: base, tools, wrk, <variant>
+  all [options]      Build all images, then run (the options of "run")
+  build <target>     Build an image. Targets: all, base, tools, wrk, <variant>
   lint               Run PHP_CodeSniffer and PHPStan
   report <folder>    Make results.json and report.txt of a run folder
   run [options]      Run the benchmarks and the report. Options:
@@ -123,6 +124,10 @@ if [ $# -gt 0 ]; then
 fi
 
 case "$command" in
+    all)
+        build_target all
+        cmd_run "$@"
+        ;;
     build)
         build_target "$@"
         ;;

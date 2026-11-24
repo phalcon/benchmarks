@@ -58,9 +58,23 @@ build_variant() {
     )
 }
 
-# Builds the image that the first argument names: base, tools or a variant.
+# Builds all images: tools, base, wrk and each variant.
+build_all() {
+    local dir
+
+    build_tools
+    build_base
+    build_wrk
+    for dir in variants/*/; do
+        build_variant "$(basename "$dir")"
+    done
+}
+
+# Builds the image that the first argument names: all, base, tools, wrk or a
+# variant.
 build_target() {
     case "${1:-}" in
+        all) build_all ;;
         base) build_base ;;
         tools) build_tools ;;
         wrk) build_wrk ;;
