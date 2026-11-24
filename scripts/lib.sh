@@ -130,6 +130,34 @@ bench_verify_variant() {
     return "$failed"
 }
 
+# Runs the load generator for one test on the wrk vCPU and writes its raw
+# output to a file. Arguments: test, output file, levels and duration (the
+# test levels and DURATION when empty). Returns 1 when wrk fails or does not
+# run on the wrk vCPU.
+bench_wrk() {
+    local test=$1 out=$2
+    bench_test_env "$test"
+    local levels=${3:-$TEST_LEVELS} duration=${4:-$DURATION}
+
+    # The run is in the background. Thus a signal stops "wait" at once, and
+    # the trap runs without a wait for the end of the wrk run.
+    docker run --rm --name bench-wrk \
+        --network host \
+        --cpuset-cpus "$WRK_CPU" \
+        --ulimit nofile=65535:65535 \
+        --env URL="http://127.0.0.1:${PORT}${TEST_URL}" \
+        --env ACCEPT="$TEST_ACCEPT" \
+        --env LEVELS="$levels" \
+        --env PIPELINE="$TEST_PIPELINE" \
+        --env DURATION="$duration" \
+        --env SERVER_CPU="$SERVER_CPU" \
+        --env WRK_CPU="$WRK_CPU" \
+        bench/wrk sh /wrk/run.sh > "$out" &
+    wait $! || return 1
+
+    [ "$(head -n 1 "$out")" = "AFFINITY ${WRK_CPU}" ] || return 1
+}
+
 # Runs a command in the tools image, with the repository at /srv.
 bench_tools() {
     local tty=()

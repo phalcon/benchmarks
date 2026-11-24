@@ -16,14 +16,49 @@ usage() {
 Usage: ./bench <command> [arguments]
 
 Commands:
-  build <target>     Build an image. Targets: base, tools, <variant>
+  build <target>     Build an image. Targets: base, tools, wrk, <variant>
   lint               Run PHP_CodeSniffer and PHPStan
   stop               Remove the benchmark containers
   test [arguments]   Run PHPUnit
   tools <command>    Run a command in the tools image
   verify <variant> [--keep] [--env NAME=VALUE]...
                      Start the server of a variant and check it
+  wrk <test> <file> [--levels "<list>"] [--duration <seconds>]
+                     Run the load generator against the running server
 EOF
+}
+
+# Runs the load generator for one test against a server that runs already
+# (for example after "verify --keep").
+cmd_wrk() {
+    local test="" out="" levels="" duration=""
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --levels) levels=$2; shift ;;
+            --duration) duration=$2; shift ;;
+            -*) bench_die "unknown option: $1" ;;
+            *)
+                if [ -z "$test" ]; then
+                    test=$1
+                else
+                    out=$1
+                fi
+                ;;
+        esac
+        shift
+    done
+    if [ -z "$test" ] || [ -z "$out" ]; then
+        bench_die "usage: ./bench wrk <test> <file> [--levels \"<list>\"] [--duration <seconds>]"
+    fi
+
+    # Remove only the wrk container. The server stays up.
+    trap 'docker rm -f bench-wrk >/dev/null 2>&1 || true' EXIT
+    trap 'exit 130' INT TERM
+
+    mkdir -p "$(dirname "$out")"
+    bench_wrk "$test" "$out" "$levels" "$duration" \
+        || bench_die "wrk failed or did not run on vCPU ${WRK_CPU} (see ${out})"
 }
 
 # Starts the server of a variant, checks the CPU affinity, the variant and
@@ -94,6 +129,9 @@ case "$command" in
         ;;
     verify)
         cmd_verify "$@"
+        ;;
+    wrk)
+        cmd_wrk "$@"
         ;;
     *)
         usage >&2
