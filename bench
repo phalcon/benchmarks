@@ -10,6 +10,8 @@ cd "$(dirname "$(readlink -f "$0")")"
 . scripts/build.sh
 # shellcheck source=scripts/run.sh
 . scripts/run.sh
+# shellcheck source=scripts/sweep.sh
+. scripts/sweep.sh
 
 bench_load_env
 
@@ -26,6 +28,9 @@ Commands:
                      --levels-json "<list>", --levels-plaintext "<list>",
                      --env NAME=VALUE (server), --allow-noise, --dom0-confirmed
   stop               Remove the benchmark containers
+  sweep [options]    Run the php-fpm worker sweep (D6). Options:
+                     --values "<list>", --repetitions <n>, --duration <s>,
+                     --allow-noise, --dom0-confirmed
   test [arguments]   Run PHPUnit
   tools <command>    Run a command in the tools image
   verify <variant> [--keep] [--env NAME=VALUE]...
@@ -134,6 +139,9 @@ case "$command" in
         ;;
     stop)
         bench_cleanup
+        ;;
+    sweep)
+        cmd_sweep "$@"
         ;;
     test)
         bench_tools vendor/bin/phpunit "$@"

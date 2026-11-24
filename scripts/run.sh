@@ -142,4 +142,7 @@ cmd_run() {
     run_value END "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "${meta}/run.env"
     bench_tools php scripts/report.php "$dir"
     echo "run folder: ${dir}"
+
+    # The folder of the last run, for the sweep.
+    RUN_DIR=$dir
 }
