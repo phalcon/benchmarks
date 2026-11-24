@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Entry point of the benchmark suite.
+set -euo pipefail
+
+cd "$(dirname "$(readlink -f "$0")")"
+
+# shellcheck source=scripts/lib.sh
+. scripts/lib.sh
+# shellcheck source=scripts/build.sh
+. scripts/build.sh
+
+bench_load_env
+
+usage() {
+    cat <<'EOF'
+Usage: ./bench <command> [arguments]
+
+Commands:
+  build <target>     Build an image. Targets: tools
+  lint               Run PHP_CodeSniffer and PHPStan
+  test [arguments]   Run PHPUnit
+  tools <command>    Run a command in the tools image
+EOF
+}
+
+command=${1:-}
+if [ $# -gt 0 ]; then
+    shift
+fi
+
+case "$command" in
+    build)
+        build_target "$@"
+        ;;
+    lint)
+        bench_tools vendor/bin/phpcs
+        bench_tools vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+        ;;
+    test)
+        bench_tools vendor/bin/phpunit "$@"
+        ;;
+    tools)
+        bench_tools "$@"
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac
